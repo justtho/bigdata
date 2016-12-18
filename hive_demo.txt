@@ -1,0 +1,11 @@
+CREATE DATABASE IF NOT EXISTS cards;
+
+CREATE TABLE deck_of_cards (
+     COLOR string,
+     SUIT string,
+     PIP string)
+     ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'
+     STORED AS TEXTFILE;
+
+
+LOAD DATA LOCAL INPATH '/home/cloudera/demo/data/cards/deckofcards.txt' INTO TABLE deck_of_cards;
