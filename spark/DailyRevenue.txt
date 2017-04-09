@@ -1,0 +1,24 @@
+
+'''Ingest and query relational data '''
+
+val orders = sc.textFile("/user/justycx201703/retail_db/orders")
+orders.take(5).foreach(println)
+val ordersFiltered = orders.filter(rec => rec.split(",")(3) == "COMPLETE" || rec.split(",")(3) == "CLOSED")
+ ordersFiltered.take(10).foreach(println)
+ ''' find the orderid and order date '''
+ val ordersMap = ordersFiltered.map(rec => (rec.split(",")(0).toInt, rec.split(",")(1)))
+ 
+ '''Getting order item and total from order item table '''
+ val orderItems = sc.textFile("/user/justycx201703/retail_db/order_items")
+ val orderItemsMap = orderItems.map(rec => (rec.split(",")(1).toInt, rec.split(",")(4).toDouble))
+ orderItemsMap.take(10).foreach(println)
+ '''joining orders and order_items table '''
+ val ordersJoin = ordersMap.join(orderItemsMap)
+ 
+ '''removing the order id '''
+ val ordersJoinMap = ordersJoin.map(_._2)
+ 
+ val ordersJoinMapRBK = ordersJoinMap.reduceByKey((agg, value) => agg + value)
+ 
+ '''saving the file as text file '''
+ ordersJoinMapRBK.saveAsTextFile("/user/justycx201703/dailyrevenue")
