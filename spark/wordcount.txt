@@ -1,0 +1,18 @@
+'''
+word count program :Using scala
+'''
+
+val word = sc.textFile("file:/home/justycx201703/wordcount.txt")
+
+word.flatMap(rec => rec.split(" ")).
+map(rec => (rec, 1)).
+reduceByKey((agg, value) => agg + value).
+saveAsTextFile("/user/justycx201703/wcoutput")
+
+'''NEW PROGRAM'''
+
+val randomtext = sc.textFile("file:/home/justycx201703/wordcount.txt")
+val fm = randomtext.flatMap(rec => rec.split(" "))
+val m = fm.map(rec => (rec,1))
+val r = m.reduceByKey((rec, agg) => rec+agg)
+r.map(rec => rec.productIterator.mkString("\t")).collect().foreach(println)
