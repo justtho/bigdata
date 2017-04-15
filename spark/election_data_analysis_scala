@@ -1,0 +1,55 @@
+''' Election data analysis using spark scala '''
+val fileContents = sc.textFile("/user/justycx201703/ls2014.tsv")
+
+'''dropping the title row '''
+val data = fileContents.mapPartitionsWithIndex((idx,itr) => if (idx == 0) itr.drop(1) else itr)
+
+'''filtering the UP data '''
+val dataUP = data.filter(rec => rec.split("\t")(0) == "Uttar Pradesh")
+ dataUP.count()
+ dataUP.take(10).foreach(println)
+ val dataPerConstituencyAndParty = dataUP.map(rec => {
+      val r = rec.split("\t")
+      ((r(0), r(1)), (r(6), r(10).toInt))
+      })
+      
+val dataPerConstituency = dataPerConstituencyAndParty.groupByKey()
+
+dataPerConstituency.collect().foreach(println)
+
+dataPerConstituency.count
+
+
+
+def recalWithAlliance(rec: Iterable[(String, Int)]): Iterable[(String, Int)] = {
+        rec.map(r => {
+          if(r._1 == "INC" || r._1 == "SP")
+            ("ALLY", r._2)
+          else
+            r
+      }).
+      groupBy(r => r._1).
+      map(r => (r._1, r._2.map(_._2).sum))
+      }
+     
+
+val l = List(("BSP",213792), ("BJP",575889), ("SP",385422), ("INC",84089), ("AAAP",5536), ("ARWP",2029), ("RrSP",4215), ("PECP",1819), ("SHS",2121), ("IND",2036), ("IND",2605), ("IND",2727), ("IND",4522), ("IND",8600), ("IND",11443), ("NOTA",13959))
+
+val lg = l.map(r => {
+      if(r._1 == "SP" || r._1 == "INC")
+     ("ALLY", r._2)
+     else
+     r
+     })  
+     
+lg.groupBy(r => r._1).map(r => (r._1, r._2.map(_._2).sum))
+
+val dataWith3Way = dataPerConstituency.map(rec => recalWithAlliance(rec._2))
+
+val dataWith3Way = dataPerConstituency.map(rec => (rec._1, recalWithAlliance(rec._2)))
+
+dataWith3Way.map(rec => (rec._1, rec._2.toList.sortBy(k => -k._2)))
+
+dataWith3Way.map(rec => (rec._1, rec._2.toList.sortBy(k => -k._2))).map(rec => (rec._1._1, rec._2(0)._1))
+
+dataWith3Way.map(rec => (rec._1, rec._2.toList.sortBy(k => -k._2))).map(rec => ((rec._1._1, rec._2(0)._1), 1)).countByKey()foreach(println)
