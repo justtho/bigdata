@@ -1,0 +1,11 @@
+Load the context text file:
+
+val content = sc.textFile("Spark2/Content.txt")
+val remove = sc.textFile("Spark2/Remove.txt")
+val removeRDD = remove.flatMap(x => x.split(",")).map(word => word.trim)
+val bRemove= sc.broadcast(removeRDD.collect().toList)
+val words = content.flatMap(line => line.split(" "))
+val filtered = words.filter{case(word) => !bRemove.value.contains(word)}
+val pairRDD = filtered.map(word => (word,1))
+val wordCount = pairRDD.reduceByKey(_+_)
+wordCount.saveAsTextFile("Spark2/result.txt")
