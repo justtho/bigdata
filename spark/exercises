@@ -1,3 +1,4 @@
+## Removing the text from a file and saving it to a folder
 Load the context text file:
 
 val content = sc.textFile("Spark2/Content.txt")
