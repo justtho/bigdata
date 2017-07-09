@@ -30,3 +30,15 @@ val sortedOutput = swapped.sortByKey(false)
 sortedOutput.saveAsTextFile("Spark3/result")
 import org.apache.hadoop.io.compress.GzipCodec
 sortedOutput.saveAsTextFile("Spark3/compressedresult",classOf[GzipCodec])
+
+## QN 33 Join tables in scala
+Load tables into hdfs
+hadoop fs -copyFromLocal spark5 /user/justycx201703
+
+val name = sc.textFile("spark5/EmployeeName.csv")
+val namePairRDD = name.map(x =>(x.split(","),(0),x.split(","),(1)))
+
+val salary= sc.textFile("spark5/EmployeeSalary.csv")
+val salaryPairRDD = salary.map(x =>(x.split(","),(0),x.split(","),(1)))
+
+val joined = namePairRDD.join(salaryPairRDD)
