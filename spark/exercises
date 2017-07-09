@@ -1,4 +1,4 @@
-## Removing the text from a file and saving it to a folder
+## QN 31 Removing the text from a file and saving it to a folder
 Load the context text file:
 
 val content = sc.textFile("Spark2/Content.txt")
@@ -10,3 +10,23 @@ val filtered = words.filter{case(word) => !bRemove.value.contains(word)}
 val pairRDD = filtered.map(word => (word,1))
 val wordCount = pairRDD.reduceByKey(_+_)
 wordCount.saveAsTextFile("Spark2/result.txt")
+
+##QN32 Filter words in a text
+Load 3 text files in a folder to spark
+
+val content = sc.textFile("Spark3/sparkdir1/file1.txt,Spark3/sparkdir2/file2.txt,Spark3/sparkdir3/file3.txt")
+content.take(5).foreach(println)
+
+val flatContent = content.flatMap(word => word.split(" "))
+flatContent.take(10).foreach(println)
+
+val trimmedContent = flatContent.map(word => word.trim)
+val removeRDD = sc.parallelize(List("a","the","an","as","a","with","this","these","is","are","in","for","to","and","The","of"))
+val filtered = trimmedContent.subtract(removeRDD)
+val pairRDD = filtered.map(word => (word,1))
+val wordCount = pairRDD.reduceByKey(_+_)
+val swapped = wordCount.map(item => item.swap)
+val sortedOutput = swapped.sortByKey(false)
+sortedOutput.saveAsTextFile("Spark3/result")
+import org.apache.hadoop.io.compress.GzipCodec
+sortedOutput.saveAsTextFile("Spark3/compressedresult",classOf[GzipCodec])
