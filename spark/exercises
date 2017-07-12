@@ -36,9 +36,14 @@ Load tables into hdfs
 hadoop fs -copyFromLocal spark5 /user/justycx201703
 
 val name = sc.textFile("spark5/EmployeeName.csv")
-val namePairRDD = name.map(x =>(x.split(","),(0),x.split(","),(1)))
+val namePairRDD = name.map(x =>(x.split(",")(0),x.split(",")(1)))
 
 val salary= sc.textFile("spark5/EmployeeSalary.csv")
-val salaryPairRDD = salary.map(x =>(x.split(","),(0),x.split(","),(1)))
+val salaryPairRDD = salary.map(x =>(x.split(",")(0),x.split(",")(1)))
 
 val joined = namePairRDD.join(salaryPairRDD)
+val keyRemoved = joined.values
+val swapped = keyRemoved.map(item => item.swap)
+val grpByKey = swapped.groupByKey.collect()
+val rddByKey = grpByKey.map{case(k,v) => k->sc.makeRDD(v.toSeq)}
+rddByKey.foreach{case(k,rdd) => rdd.saveAsTextFile("spark5/Employee"+k)}
