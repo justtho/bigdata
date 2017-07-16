@@ -47,3 +47,18 @@ val swapped = keyRemoved.map(item => item.swap)
 val grpByKey = swapped.groupByKey.collect()
 val rddByKey = grpByKey.map{case(k,v) => k->sc.makeRDD(v.toSeq)}
 rddByKey.foreach{case(k,rdd) => rdd.saveAsTextFile("spark5/Employee"+k)}
+
+## QN 34 ceating an rdd, removing headers, and filtering words
+Load the data into hdfs
+hadoop fs -copyFromLocal spark6 /user/justycx201703
+
+val csv = sc.textFile("spark6/user.csv")
+val headerAndRows = csv.map(line => line.split(",").map(_.trim))
+val header = headerAndRows.first
+val data = headerAndRows.filter(_(0)!= header(0))
+val maps = data.map(splits => header.zip(splits).toMap)
+#Filter out the user myself
+val result = maps.filter(map => map("id") != "myself")
+result.saveAsTextFile("spark6/result.txt")
+
+
