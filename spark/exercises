@@ -61,4 +61,15 @@ val maps = data.map(splits => header.zip(splits).toMap)
 val result = maps.filter(map => map("id") != "myself")
 result.saveAsTextFile("spark6/result.txt")
 
+## QN 35 sort the file by name and save into a folder
+Load the data into hdfs
+hadoop fs -copyFromLocal spark7 /user/justycx201703
+
+val name = sc.textFile("spark7/EmployeeName.csv")
+val namePairRDD = name.map(x => (x.split(",")(0), x.split(",")(1)))
+val swapped = namePairRDD.map(item => item.swap)
+val sortedOutput = swapped.sortByKey()
+val swappedBack = sortedOutput.map(item => item.swap)
+## save the file as one textfile
+swappedBack.repartition(1).saveAsTextFile("spark7/result.txt")
 
