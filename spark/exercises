@@ -101,3 +101,23 @@ val bad = badRecords.map(e => (e(0), e(1), e(2)))
 
 valid.repartition(1).saveAsTextFile("spark9/good.txt")
 bad.repartition(1).saveAsTextFile("spark9/bad.txt")
+
+## QN 39 Join two files
+hadoop fs -copyFromLocal spark16 /user/justycx201703
+
+val one = sc.textFile("spark16/file1.txt").map{
+_.split(",",-1) match{
+case Array(a,b,c) => (a,(b,c))
+}
+}
+
+val two = sc.textFile("spark16/file2.txt").map{
+_.split(",",-1) match{
+case Array(a,b,c) => (a,(b,c))
+}
+}
+
+val joined = one.join(two)
+val sum = joined.map{
+case(_,((_,num2),(_,_))) => num2.toInt
+}.reduce(_+_)
