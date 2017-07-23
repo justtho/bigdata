@@ -121,3 +121,11 @@ val joined = one.join(two)
 val sum = joined.map{
 case(_,((_,num2),(_,_))) => num2.toInt
 }.reduce(_+_)
+
+## QN 40 
+hadoop fs -copyFromLocal spark15 /user/justycx201703
+
+val field = sc.textFile("spark15/file1.txt")
+val mapper = field.map(x => x.split(",", -1))
+
+mapper.map(x => x.map(x => {if(x.isEmpty) 0 else x})).collect
