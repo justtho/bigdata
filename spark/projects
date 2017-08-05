@@ -1,4 +1,4 @@
-####Recommendation system
+#### Retail Store Recommendation system
 hadoop fs -copyFromLocal casestudy2 /user/justycx201703
 
 val retailData = sc.textFile("casestudy2/retail_2013.csv")
