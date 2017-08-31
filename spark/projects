@@ -88,3 +88,38 @@ tfile2.take(1)
 
 //create case class for values
 case class tran(source : String, amount : Int)
+//Parse data and create pair RDD
+var trans1=tfile1.map{ t=> val line=t.split(",") ; (line(1),tran(line(2),line(3).toInt)) }
+var trans2=tfile2.map{ t=> val line=t.split(",") ; (line(1),tran(line(2),line(3).toInt)) }
+
+//check the partitioner and repartition the data
+trans1.partitioner
+trans1 = trans1.partitionBy(new HashPartitioner(20)).persist()
+
+trans1.partitioner
+trans2.partitioner
+trans2 = trans2.partitionBy(new HashPartitioner(20)).persist()
+
+//Join the two months data, check the partioner for the result
+val jtrans = trans1.join(trans2)
+jtrans.partitioner
+jtrans.take(5).foreach(println)
+// Get the same transactions in both the months
+val sameTrans = jtrans.filter{case(acct,(tran1,tran2)) => (tran1.source == tran2.source && tran1.amount == tran2.amount)}
+
+sameTrans.take(10).foreach(println)
+//Use the count by key to get the number of transactions for each account 
+val sameTranAccts = sameTrans.countByKey()
+
+sameTranAccts.take(10).foreach(println)
+// cogroup the data of two months
+val ctrans = trans1.cogroup(trans2)
+ctrans.take(2).foreach(println)
+
+//Filter to get the accounts with one month empty
+val notrans = ctrans.filter{case(acct,(itran1,itran2)) => (itran1.isEmpty || itran2.isEmpty)}
+
+// Check the accounts with no transactions
+notrans.keys.foreach(println)
+// Save the no transaction data to a directory
+notrans.saveAsTextFile("casestudy6/notransout")
