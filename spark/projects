@@ -69,3 +69,22 @@ Kitchen furnishings
 Chocolates & Candies
 Vehicle Power adapters
 Outdoor furniture
+
+*****************************************************************************************************
+BANK TRANSACTION PROCESSING
+*****************************************************************************************************
+hadoop fs -copyFromLocal casestudy6 /user/justycx201703
+
+import org.apache.spark.HashPartitioner
+//Load the data
+val tfile1=sc.textFile("casestudy6/transactions_08.csv")
+val tfile2=sc.textFile("casestudy6/transactions_09.csv")
+
+tfile1.count
+tfile2.count
+
+tfile1.take(1)
+tfile2.take(1)
+
+//create case class for values
+case class tran(source : String, amount : Int)
