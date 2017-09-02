@@ -1,6 +1,8 @@
 
 *****************************************************************************************************
-BANK TRANSACTION PROCESSING
+BANK TRANSACTION PROCESSING: Transaction data of two months data:
+Finding customers have same transaction in both months 
+Finding customers have transaction in  one month not the other
 *****************************************************************************************************
 hadoop fs -copyFromLocal casestudy6 /user/justycx201703
 
