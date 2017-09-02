@@ -1,0 +1,20 @@
+
+*****************************************************************************************************
+BANK ACCOUTS FILTERING:EXTRACTING HIGH VALUE CUSTOMERS
+Accounts Balances of the previous month is given
+Transaction for the current month is given.  
+Using this tables filtering the high value customers.
+Files are in comma separated format.
+*****************************************************************************************************
+hadoop fs -copyFromLocal casestudy7 /user/justycx201703
+
+import org.apache.spark.util._
+//Load the data
+val bvar=sc.textFile("casestudy7/balance.txt")
+val tran=sc.textFile("casestudy7/transactions.txt")
+
+bvar.count
+tran.count
+
+bvar.take(1)
+tran.take(1)
