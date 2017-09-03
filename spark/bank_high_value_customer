@@ -18,3 +18,57 @@ tran.count
 
 bvar.take(1)
 tran.take(1)
+val slist : CollectionAccumulator[String] = new CollectionAccumulator()
+sc.register(slist,"Myslist")
+
+
+// Create a pair RDD from the balance data
+val bvarPair = bvar.map{b=> 
+    var fields = b.split(',')
+    (fields(0), fields(1).toInt)}
+
+// Collect the RDD as a scala map. This is required for the lookup
+
+val bvarMap = bvarPair.collectAsMap()
+
+// broadcast the map to all the nodes
+val broadcastVar = sc.broadcast(bvarMap)
+
+//This function uses the map to lookup the account balance given an account number
+ def getBalance(bals: scala.collection.Map[String,Int], acctNum: String) : Int = { 
+
+  if(bals.contains(acctNum)) return bals(acctNum)
+  0
+}
+// Test the binary search function
+ getBalance(broadcastVar.value, "10010019")
+//res6: Int = 288500
+
+getBalance(broadcastVar.value, "10010034")
+//res7: Int = 129220
+
+// extract transactions : Make credits positive and debits negative
+val trans = tran.map { p=>
+    val t = p.split(",")
+    (t(3), if(t(4)=="CR") t(5).toInt else -t(5).toInt) }
+
+//sumup the transactions for each account
+val sumall = trans.reduceByKey((x,y)=>x+y)
+
+
+// get balance + transaction using the broadcast variable
+val finalBalance = sumall.map { s=>
+  (s._1,s._2+getBalance(broadcastVar.value,s._1)) }
+
+// Collect accounts with high balance to accumulator
+
+finalBalance.foreach(x => if(x._2 > 1000000) slist.add(x._1))
+
+slist.value.size
+for(i<-0 to 20) println(slist.value.get(i))
+
+
+//scala> slist.value.size
+//res7: Int = 263
+
+//scala> for(i<-0 to 20) println(slist.value.get(i))
