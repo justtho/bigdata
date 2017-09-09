@@ -1,0 +1,50 @@
+//
+MovieLens data set is the review of movies.  Dataset has :
+100,000 ratings (1-5) from 943 users on 1682 movies
+Each user has rated at leas 20 movies.
+*dataset : u.data : userid movieid rating timing
+           u.user: demographic information of teh user: userid age, gender, occupation zipcoe
+//
+
+val sqlContext= new org.apache.spark.sql.SQLContext(sc)
+import sqlContext.implicits._
+
+import org.apache.spark.sql._
+
+val udata = sc.textFile("/user/justycx201703/movie_review/u.data")
+
+case class udata_schema(userId:Integer, movieId:Integer, rating:Integer, time:String)
+val udata_rdd = udata.map(_.split("\t")).map(p => udata_schema(p(0).toInt, p(1).toInt, p(2).toInt,p(3)))
+val udata_df = udata_rdd.toDF()
+udata_df.printSchema()
+udata_df.registerTempTable("u_data")
+val results = sqlContext.sql("""select * from u_data""")
+results.show()
+
+//Show the number of movies reviewed by each user in the newly created u_data table
+val results = sqlContext.sql("""select movieId, count(userId) as no from u_data group by movieId order by no desc""")
+results.show()
+
+//load the u.user into RDD
+val userText = sc.textFile("/user/justycx201703/movie_review/u.user")
+
+//Change RDD to a DataFrame
+case class user(userId:Integer, age:Integer, gender:String, occupation:String, zip:String)
+
+val user_rdd = userText.map(_.split('|')).map(p=> user(p(0).toInt, p(1).toInt, p(2), p(3), p(4)))
+val user_df = user_rdd.toDF()
+user_df.printSchema()
+
+//Register the dataframe asa atemp u_user table
+user_df.registerTempTable("u_user")
+
+//Display the contents of the table
+val results = sqlContext.sql("""select * from u_user""")
+results.show()
+
+//Count the number of users in the u_user table genderwise
+val results = sqlContext.sql("""select gender, count(*) from u_user group by gender""")
+results.show()
+
+//join u_data table and u_user table based on userid
+val results = sqlContext.sql("""select * from u_user usr join u_data mov on usr.userId = mov.userId""")
