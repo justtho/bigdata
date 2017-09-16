@@ -1,0 +1,63 @@
+YELP DATASET(JSON) ANALYSIS
+business.json: contains business data including location data, attributes and categories
+review.json : contains full review text data including the user_id that wrote the review and the business_id the review written for.
+
+
+import org.apache.spark.sql._
+
+**create a dataframe from Yelp Business dataset **
+val yelp_ds = sqlContext.read.json("/user/justycx201703/yelp_business.json")
+
+**check the datata schema**
+yelp_ds.printSchema()
+
+**Register as Temporary table in order to use SQL interface **
+yelp_ds.registerTempTable("yelp_ds")
+
+**create a dataframe from yelp review data set**
+val yelp_review_ds = sqlContext.read.json("/user/justycx201703/yelp_review.json")
+
+**check the data schema **
+yelp_review_ds.printSchema()
+
+**Register a temporary table in order to use SQL interface **
+yelp_review_ds.registerTempTable("yelp_review_ds")
+
+QUESTIONS 
+
+Q1 - How many businessess are ther in the dataset ?
+Ans - sqlContext.sql("SELECT count(distinct(business_id)) as business_count from yelp_ds").show
+** 85901 **
+
+Q2 - How many businesses are there in each state ( states are arranged in descending order based on count of business)
+Ans - sqlContext.sql("SELECT state, count(distinct(business_id)) as business_count from yelp_ds group by state order by business_count desc").show
+
+Q3 -  What is the total review count in the dataset?
+Ans - sqlContext.sql("SELECT sum(review_count) as total_review from yelp_ds").show
+** 2950902 **
+
+Q4 – Which five-star business has the highest review count and which city and state is it in?
+Ans - sqlContext.sql("SELECT name, stars, review_count, city, state from yelp_ds where stars= 5.0 order by review_count desc").show(1)
+
+Q5 What are the top 5 four-star businesses in Phoenix by review count?
+Ans - sqlContext.sql("SELECT name, stars, review_count from yelp_ds where city = 'Phoenix' and stars = 4.0 order by review_count desc limit 5").show
+
+Q6 What are the top 5 cities by average no. of reviews for a business?
+Ans - sqlContext.sql("SELECT city, round(avg(review_count)) as avg_reviews from yelp_ds group by city order by avg_reviews desc limit 5").show
+
+Q7 What is the distribution of reviews across the various businesses?
+Ans - sqlContext.sql("SELECT name, review_count from yelp_ds order by review_count desc").show
+
+Q8 What are the top 20 businesses by average review length?
+Ans - val review_len_temp = sqlContext.sql("SELECT business_id, round(avg(length(text)),0) as avg_review_length from yelp_review_ds group by business_id order by business_id ")
+      
+      review_len_temp.registerTempTable("review_len_temp")
+      
+      val joinedDF = sqlContext.sql("SELECT yelp_ds.name, avg_review_length from review_len_temp left join yelp_ds on review_len_temp.business_id = yelp_ds.business_id order by avg_review_length desc")
+      
+      joinedDF.show(20)
+      
+ Q9 What are the top 10 categories by number of occurrences?
+ Ans - sqlContext.sql("SELECT int_df.category, COUNT(int_df.category) as count FROM (SELECT EXPLODE(categories) as category FROM yelp_ds) int_df GROUP BY int_df.category ORDER BY count DESC LIMIT 10").show
+ (EXPLODE COMMAND FLATTENS THE NESTED ARRAY)
+      
