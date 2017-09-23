@@ -1,1 +1,35 @@
 Probelm statement: From the order table find the count by order status
+
+# Reading the file from the local directory and creating an RDD
+val orders = sc.textFile("file:///home/justycx201703/data/retail_db/orders")
+orders.first()
+# res2: String = 1,2013-07-25 00:00:00.0,11599,CLOSED
+
+val ordersMap = orders.map(rec =>{
+(rec.split(",")(3),1)
+}
+)
+
+ordersMap.collect().foreach(println)
+ordersMap.take(5)
+# res7: Array[(String, Int)] = Array((CLOSED,1), (PENDING_PAYMENT,1), (COMPLETE,1), (CLOSED,1), (COMPLETE,1))
+
+val orderStatusCount = ordersMap.reduceByKey((agg, value) => agg + value)
+orderStatusCount.collect().foreach(println)
+#
+(PENDING_PAYMENT,15030)
+(CLOSED,7556)
+(CANCELED,1428)
+(PAYMENT_REVIEW,729)
+(PENDING,7610)
+(ON_HOLD,3798)
+(PROCESSING,8275)
+(SUSPECTED_FRAUD,1558)
+(COMPLETE,22899)
+#
+#Doing in one line
+sc.textFile("file:///home/justycx201703/data/retail_db/orders").
+map(rec => (rec.split(",")(3),1)).
+reduceByKey(_+_).
+collect().
+foreach(println)
