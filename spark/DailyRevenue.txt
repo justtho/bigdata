@@ -1,3 +1,5 @@
+Problem Statement: Calculate Daily Revenue from Closed and Completed Orders from Retail Data.
+Tables: Customers, Departments, Products, Categories, Orders, Order_Items
 
 '''Ingest and query relational data '''
 
