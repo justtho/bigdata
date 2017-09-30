@@ -18,9 +18,26 @@ val ordersFiltered = orders.filter(rec => rec.split(",")(3) == "COMPLETE" || rec
  val ordersJoin = ordersMap.join(orderItemsMap)
  
  '''removing the order id '''
- val ordersJoinMap = ordersJoin.map(_._2)
+ '''scala> val t = (65722,("2014-05-23 00:00:00.0",199.98))
+t: (Int, (String, Double)) = (65722,(2014-05-23 00:00:00.0,199.98))
+
+scala> t._1
+res15: Int = 65722
+
+scala> t._2
+res16: (String, Double) = (2014-05-23 00:00:00.0,199.98)
+
+scala> t._2._1
+res17: String = 2014-05-23 00:00:00.0
+
+scala> t._2._2
+res18: Double = 199.98
+'''
+ val ordersJoinMap = ordersJoin.map(rec => rec._2)
  
  val ordersJoinMapRBK = ordersJoinMap.reduceByKey((agg, value) => agg + value)
+ ordersJoinMapRBK.collect().foreach(println)
+ ordersJoinMapRBK.count
  
  '''saving the file as text file '''
  ordersJoinMapRBK.saveAsTextFile("/user/justycx201703/dailyrevenue")
