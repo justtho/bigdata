@@ -1,0 +1,76 @@
+### products table
+
+val products = sc.textFile("/user/justycx201703/retail_db/products")
+#Filtering out a row which is not in the right format
+val productsFiltered = products.filter(rec => rec.split(",")(4)!="")
+
+products.count
+res1: Long = 1345
+
+productsFiltered.count
+res3: Long = 1344
+
+#Getting teh first product
+products.first
+res4: String = 1,2,Quest Q64 10 FT. x 10 FT. Slant Leg Instant U,,59.98,http://images.acmesports.sports/Quest+Q64+10+FT.+x+10+FT.+Slant+Leg+Instant+Up+Canopy
+
+#Getting the highest price
+ productsFiltered.map(_.split(",")(4).toFloat).top(1)
+ res5: Array[Float] = Array(1999.99)
+ 
+ productsFiltered.map(_.split(",")(4).toFloat).top(5)
+ res6: Array[Float] = Array(1999.99, 1799.99, 1799.99, 1799.99, 1099.99)
+ 
+ #Getting the price
+ productsFiltered.map(_.split(",")(4).toFloat)
+ 
+ #Sorting descending by price: To sort we need a (K,V):  price is the K(key) and rec is the V(value)
+ productsFiltered.map(rec => (rec.split(",")(4).toFloat, rec)).sortByKey(false).take(5).foreach(println)
+
+(1999.99,208,10,SOLE E35 Elliptical,,1999.99,http://images.acmesports.sports/SOLE+E35+Elliptical)
+(1799.99,66,4,SOLE F85 Treadmill,,1799.99,http://images.acmesports.sports/SOLE+F85+Treadmill)
+(1799.99,199,10,SOLE F85 Treadmill,,1799.99,http://images.acmesports.sports/SOLE+F85+Treadmill)
+(1799.99,496,22,SOLE F85 Treadmill,,1799.99,http://images.acmesports.sports/SOLE+F85+Treadmill)
+(1099.99,1048,47,"Spalding Beast 60"" Glass Portable Basketball ",,1099.99,http://images.acmesports.sports/Spalding+Beast+60%22+Glass+Portable+Basketball+Hoop)
+
+# Sorting and taking only the record, discarding the Key ie. the price because price is already in the record
+productsFiltered.map(rec => (rec.split(",")(4).toFloat, rec)).sortByKey(false).map(_._2).take(5).foreach(println)
+
+208,10,SOLE E35 Elliptical,,1999.99,http://images.acmesports.sports/SOLE+E35+Elliptical
+66,4,SOLE F85 Treadmill,,1799.99,http://images.acmesports.sports/SOLE+F85+Treadmill
+199,10,SOLE F85 Treadmill,,1799.99,http://images.acmesports.sports/SOLE+F85+Treadmill
+496,22,SOLE F85 Treadmill,,1799.99,http://images.acmesports.sports/SOLE+F85+Treadmill
+1048,47,"Spalding Beast 60"" Glass Portable Basketball ",,1099.99,http://images.acmesports.sports/Spalding+Beast+60%22+Glass+Portable+Basketball+Hoop
+
+# using takeOrdered  to sort:
+productsFiltered.takeOrdered(5)(Ordering[Double].on(x => -x.split(",")(4).toDouble)).foreach(println)
+
+208,10,SOLE E35 Elliptical,,1999.99,http://images.acmesports.sports/SOLE+E35+Elliptical
+66,4,SOLE F85 Treadmill,,1799.99,http://images.acmesports.sports/SOLE+F85+Treadmill
+199,10,SOLE F85 Treadmill,,1799.99,http://images.acmesports.sports/SOLE+F85+Treadmill
+496,22,SOLE F85 Treadmill,,1799.99,http://images.acmesports.sports/SOLE+F85+Treadmill
+1048,47,"Spalding Beast 60"" Glass Portable Basketball ",,1099.99,http://images.acmesports.sports/Spalding+Beast+60%22+Glass+Portable+Basketball+Hoop
+
+# Sort desc category id and price: category id is the 1, and price is 4th.....(0, 1, 2, 3,4 is the sequence)
+productsFiltered.map(rec => {
+val r = rec.split(",")
+((r(1).toInt, r(4).toDouble), rec)
+}).sortByKey(false).collect().foreach(println)
+
+((3,21.99),39,3,Nike Women's Pro Victory Compression Bra,,21.99,http://images.acmesports.sports/Nike+Women%27s+Pro+Victory+Compression+Bra)
+((3,0.0),38,3,Nike Men's Hypervenom Phantom Premium FG Socc,,0.0,http://images.acmesports.sports/Nike+Men%27s+Hypervenom+Phantom+Premium+FG+Soccer+Cleat)
+((2,299.99),16,2,Riddell Youth 360 Custom Football Helmet,,299.99,http://images.acmesports.sports/Riddell+Youth+360+Custom+Football+Helmet)
+((2,209.99),11,2,Fitness Gear 300 lb Olympic Weight Set,,209.99,http://images.acmesports.sports/Fitness+Gear+300+lb+Olympic+Weight+Set)
+
+
+# Sort Asc category id and Desc price: category id is the 1, and price is 4th.....(0, 1, 2, 3,4 is the sequence)
+productsFiltered.map(rec => {
+val r = rec.split(",")
+((r(1).toInt, -r(4).toDouble), rec)
+}).sortByKey().collect().foreach(println)
+
+((2,-29.99),22,2,Kijaro Dual Lock Chair,,29.99,http://images.acmesports.sports/Kijaro+Dual+Lock+Chair)
+((2,-29.97),18,2,Reebok Men's Full Zip Training Jacket,,29.97,http://images.acmesports.sports/Reebok+Men%27s+Full+Zip+Training+Jacket)
+((3,-199.99),40,3,Quik Shade Summit SX170 10 FT. x 10 FT. Canop,,199.99,http://images.acmesports.sports/Quik+Shade+Summit+SX170+10+FT.+x+10+FT.+Canopy)
+((3,-189.99),32,3,PUMA Men's evoPOWER 1 Tricks FG Soccer Cleat,,189.99,http://images.acmesports.sports/PUMA+Men%27s+evoPOWER+1+Tricks+FG+Soccer+Cleat)
+((3,-159.99),35,3,adidas Brazuca 2014 Official Match Ball,,159.99,http://images.acmesports.sports/adidas+Brazuca+2014+Official+Match+Ball)
