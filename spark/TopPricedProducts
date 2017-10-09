@@ -46,6 +46,23 @@ def topNProducts(rec: (String, Iterable[String]), topN: Int): Iterable[(String, 
 }
 
 productsGroupByCategory.flatMap(rec => topNProducts(rec, 3)).collect().foreach(println)
+
+********************Top N priced products***********************************
+val l = ("Bike & Skate Shop", Iterable("933,42,Nike VR_S Covert Driver,,179.99,http://images.acmesports.sports/Nike+VR_S+Covert+Driver", 
+"934,42,Callaway X Hot Driver,,0.0,http://images.acmesports.sports/Callaway+X+Hot+Driver", 
+"935,42,TaylorMade RocketBallz Stage 2 Driver,,169.99,http://images.acmesports.sports/TaylorMade+RocketBallz+Stage+2+Driver", 
+"936,42,Cleveland Golf Classic XL Driver,,119.99,http://images.acmesports.sports/Cleveland+Golf+Classic+XL+Driver", 
+"937,42,Cobra AMP Cell Driver - Orange,,169.99,http://images.acmesports.sports/Cobra+AMP+Cell+Driver+-+Orange"))
+
+val l_list = l._2.toList
+val prices = l_list.map(rec =>rec.split(",")(4).toFloat) 
+prices.sortBy(k => -k).distinct.take(3)
+
+val sortedList = l_list.sortBy(k => -k.split(",")(4).toFloat)
+sortedList .filter(rec => top3Prices.contains(rec.split(",")(4).toFloat))
+
+
+
 ****************************spark Sort , Grouping and Ranking**************
 #Getting the highest price
  productsFiltered.map(_.split(",")(4).toFloat).top(1)
