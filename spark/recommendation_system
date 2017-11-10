@@ -4,12 +4,34 @@ hadoop fs -copyFromLocal casestudy2 /user/justycx201703
 val retailData = sc.textFile("casestudy2/retail_2013.csv")
 
 retailData.count
+res0: Long = 2554634
+
+retailData.first
+res1: String = 1,2013-01-01 01:41:46,443111,Household appliance stores,Refrigerators,875,14640,1
+
 // Get the number of fields in data
 val numfields = retailData.take(1)(0).split(',').length
+numfields: Int = 8
 
 //Get distinct products
 val products = retailData.map(line=>line.split(',')(4)).distinct.cache()
 products.foreach(println)
+
+Baseball clothing & accessories
+Arts & Crafts
+Door locks
+Bedroom furniture
+Fiction
+Calendars & Diaries
+Freezers
+Personal items
+Software games
+Living room furnishings
+Platinum jewelry
+Flowers.....etc
+
+val countProducts = retailData.map(line=>line.split(',')(4)).distinct.count()
+countProducts: Long = 160
 
 // Create a map from products to their index. This is required to create an int field from products
 val productMap = products.zipWithIndex.collect.toMap
