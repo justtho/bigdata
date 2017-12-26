@@ -1,0 +1,6 @@
+# Word count Program in PySpark
+
+lines=sc.textFile("/user/justycx201703/wordcount.txt")
+words = lines.flatMap(lambda line: line.split(" "))
+wordsMap = words.map(lambda w: (w, 1))
+wordCount= wordsMap.reduceByKey(lambda w, v: w+v)
