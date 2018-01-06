@@ -1,0 +1,42 @@
+# Calculating Toral revenue on a given orderId
+
+orderItems = sc.textFile("/user/justycx201703/retail_db/order_items")
+for i in orderItems.take(10): print(i)
+
+orderItemsFilter = orderItems.filter(lambda oi: int(oi.split(",")[1]) ==2)
+for i in orderItemsFilter.take(10): print(i)
+
+orderItemsMap = orderItemsFilter.map(lambda oi: float(oi.split(",")[4]) )
+for i in orderItemsMap.take(10): print(i)
+
+orderRevenue = orderItemsMap.reduce(lambda t, v: t+v)
+print(orderRevenue)
+
+***********************************************************************************
+# Finding the Maximum Revenue generating orderItem in a a given OrderId
+
+orderItems = sc.textFile("/user/justycx201703/retail_db/order_items")
+for i in orderItems.take(10): print(i)
+
+orderItemsFilter = orderItems.filter(lambda oi: int(oi.split(",")[1]) ==2)
+for i in orderItemsFilter.take(10): print(i)
+
+orderItemsMaxRevenue = orderItemsFilter.\
+ reduce(lambda max, val: max if float(max.split(",")[4]) > float(val.split(",")[4]) else val
+)
+print(orderItemsMaxRevenue)
+
+***************************************************************************************
+# Get order items generating maximum quantity per order id
+
+orderItems = sc.textFile("/user/justycx201703/retail_db/order_items")
+for i in orderItems.take(10): print(i)
+
+orderItemsMap = orderItems.map(lambda oi: (int(oi.split(",")[1]), oi))
+for i in orderItemsMap.take(10): print(i)
+
+orderItemWithMaxQuantityPerOrder = orderItemsMap.\
+reduceByKey(lambda max, val: max if int(max.split(",")[3]) > int(val.split(",")[3]) else val
+)
+for i in orderItemWithMaxQuantityPerOrder.take(10): print(i)
+
