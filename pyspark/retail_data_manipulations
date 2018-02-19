@@ -1,0 +1,92 @@
+# Demonstraton of transformations: Map, Filter, Join
+
+orders = sc.textFile("/user/justycx201703/retail_db/orders")
+orders.first()
+u'1,2013-07-25 00:00:00.0,11599,CLOSED'
+
+# Extract order_status form the orders table
+orderStatus = orders.map(lambda o: o.split(",")[3])
+orderStatus.first()
+u'CLOSED'
+
+orderItems = sc.textFile("/user/justycx201703/retail_db/order_items")
+for in in ordersMap.take(10): print(i)u'1,1,957,1,299.98,299.98'
+
+ordersMap = orders.map(lambda o: (int(o.split(",")[0]), o.split(",")[3]))
+for in in ordersMap.take(10): print(i)
+(1, u'CLOSED')
+(2, u'PENDING_PAYMENT')
+(3, u'COMPLETE')
+(4, u'CLOSED')
+(5, u'COMPLETE')
+(6, u'COMPLETE')
+(7, u'COMPLETE')
+(8, u'PROCESSING')
+(9, u'PENDING_PAYMENT')
+(10, u'PENDING_PAYMENT')
+
+orderItemsMap = orderItems.map(lambda oi: (int(oi.split(",")[1]), float(oi.split(",")[4])))
+for i in orderItemsMap.take(10): print(i)
+(1, 299.98)
+(2, 199.99)
+(2, 250.0)
+(2, 129.99)
+(4, 49.98)
+(4, 299.95)
+(4, 150.0)
+(4, 199.92)
+(5, 299.98)
+(5, 299.95)
+
+# Join  transformation
+
+ordersJoin = ordersMap.join(orderItemsMap)
+for i in ordersJoin.take(10): print(i)
+
+(52376, (u'CLOSED', 50.0))
+(52376, (u'CLOSED', 79.98))
+(52376, (u'CLOSED', 299.98))
+(52376, (u'CLOSED', 110.0))
+(63940, (u'PENDING_PAYMENT', 199.99))
+(63940, (u'PENDING_PAYMENT', 129.99))
+(63940, (u'PENDING_PAYMENT', 299.98))
+(63940, (u'PENDING_PAYMENT', 179.97))
+(60, (u'PENDING_PAYMENT', None))
+(64, (u'PENDING_PAYMENT', 150.0))
+
+ordersLeftOuterJoin = ordersMap.leftOuterJoin(orderItemsMap)
+for i in ordersLeftOuterJoin.take(100): print(i)
+
+ordersJoin.count()
+172198
+
+ordersLeftOuterJoin.count()
+183650
+
+**************************************************************************
+>>> o = (50192, (u'PENDING', 129.99))
+>>> o[0]
+50192
+>>> o[1]
+(u'PENDING', 129.99)
+>>> o[1][0]
+u'PENDING'
+>>> o[1][1]
+129.99
+********************************************************************
+>>> o = (60, (u'PENDING_PAYMENT', None))
+>>> o[1][1] == None
+True
+******************************************************************
+>>> ordersLeftOuterJoinFilter = ordersLeftOuterJoin.filter(lambda o: o[1][1]==None)
+>>> for i in ordersLeftOuterJoinFilter.take(10): print(i)
+(43692, (u'PENDING_PAYMENT', None))
+(32, (u'COMPLETE', None))
+(40, (u'PENDING_PAYMENT', None))
+(32776, (u'CLOSED', None))
+(65904, (u'PENDING_PAYMENT', None))
+(60, (u'PENDING_PAYMENT', None))
+(38240, (u'COMPLETE', None))
+(57440, (u'COMPLETE', None))
+(76, (u'COMPLETE', None))
+(80, (u'COMPLETE', None))
