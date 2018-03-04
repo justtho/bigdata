@@ -1,0 +1,5 @@
+# Aggregations - total - Get revenue for given order_id
+
++ Aggregations - total
+orderItems = sc.textFile("/user/justycx201703/data/order_items")
+orderItems.count()
