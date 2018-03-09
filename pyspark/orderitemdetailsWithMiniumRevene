@@ -1,7 +1,28 @@
-# Get order item details with minimum subtotals for a given order id
-
-
+# Get order item details with minimum subtotals(revenue) for a given order id
+# Columns in Order_items table: 
+Order_item_id, Order_item_order_id, Order_item_product_id,Order_item_quantity, Order_item_subtotal, Order_item_product_price
+2,             2,                   1073,                 1,                   199.99,              199.99
+3,             2,                   502,                  5,                   250.0,               50.0
+4,             2,                   403,                  1,                   129.99,              129.99
 orderItems = sc.textFile("/user/justycx201703/retail_db/order_items")
 for i in orderItems.take(10): print(i)
 orderItemsFileterd = orderItems.filter(lambda oi: int(oi.split(",")[1]) ==2)
 for i in orderItemsFileterd.take(10): print(i)
+2,2,1073,1,199.99,199.99
+3,2,502,5,250.0,50.0
+4,2,403,1,129.99,129.99
+
+/*
+In order to find the minimum subtotal use the following logic:
+x if(True) else y
+Applying this logic in the given data:
+x if(float(x.split(",")[4]) < float(y.split(",")[4])) else y
+*/
+# Following is the way to get the order detail of the minimum subtotal(129.99) 
+orderItemsFileterd. \
+reduce(lambda x, y:
+       x if(float(x.split(",")[4]) < float(y.split(",")[4])) else y
+       )
+       
+u'4,2,403,1,129.99,129.99'
+
