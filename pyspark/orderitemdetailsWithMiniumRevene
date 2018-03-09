@@ -1,1 +1,7 @@
+# Get order item details with minimum subtotals for a given order id
 
+
+orderItems = sc.textFile("/user/justycx201703/retail_db/order_items")
+for i in orderItems.take(10): print(i)
+orderItemsFileterd = orderItems.filter(lambda oi: int(oi.split(",")[1]) ==2)
+for i in orderItemsFileterd.take(10): print(i)
