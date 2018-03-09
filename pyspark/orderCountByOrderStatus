@@ -1,1 +1,40 @@
 # Getting the Order count by Order status: Table name: orders
+#Columns: 
+order_id   order_date              order_customer_id  order_status
+1,         2013-07-25 00:00:00.0,  11599,             CLOSED
+2,         2013-07-25 00:00:00.0,  256,               PENDING_PAYMENT
+
+orders = sc.textFile("/user/justycx201703/retail_db/orders")
+for i in orders.take(10): print(i)
+
+1,2013-07-25 00:00:00.0,11599,CLOSED
+2,2013-07-25 00:00:00.0,256,PENDING_PAYMENT
+3,2013-07-25 00:00:00.0,12111,COMPLETE
+4,2013-07-25 00:00:00.0,8827,CLOSED
+5,2013-07-25 00:00:00.0,11318,COMPLETE
+6,2013-07-25 00:00:00.0,7130,COMPLETE
+7,2013-07-25 00:00:00.0,4530,COMPLETE
+8,2013-07-25 00:00:00.0,2911,PROCESSING
+9,2013-07-25 00:00:00.0,5657,PENDING_PAYMENT
+10,2013-07-25 00:00:00.0,5648,PENDING_PAYMENT
+
+ordersStatus = orders.map(lambda o: (o.split(",")[3], 1))
+for i in ordersStatus.take(10): print(i)
+(u'CLOSED', 1)
+(u'PENDING_PAYMENT', 1)
+(u'COMPLETE', 1)
+(u'CLOSED', 1)
+(u'COMPLETE', 1)
+(u'COMPLETE', 1)
+(u'COMPLETE', 1)
+(u'PROCESSING', 1)
+(u'PENDING_PAYMENT', 1)
+(u'PENDING_PAYMENT', 1)
+
+
+countByStatus = ordersStatus.countByKey()
+>>> type(countByStatus)
+<type 'collections.defaultdict'>
+
+>>> countByStatus
+defaultdict(<type 'int'>, {u'COMPLETE': 22899, u'PAYMENT_REVIEW': 729, u'PROCESSING': 8275, u'CANCELED': 1428, u'PENDING': 7610, u'CLOSED': 7556, u'PENDING_PAYMENT': 15030, u'SUSPECTED_FRAUD': 1558, u'ON_HOLD': 3798})
