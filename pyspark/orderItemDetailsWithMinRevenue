@@ -14,3 +14,4 @@ for i in orderItemsMap.take(10): print(i)
 
 revenuePerOrderId = orderItemsMap.reduceByKey(lambda x, y: x+y)
 for i in revenuePerOrderId.take(10): print(i)
+
