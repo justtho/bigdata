@@ -1,7 +1,10 @@
-# Sort data by product category and then by product price descending - sortByKey
+# Sort data by product category ascending and then by product price descending - sortByKey
 
 products = sc.textFile("/user/justycx201703/retail_db/products")
 for i in products.take(10): print(i)
+
+Columns:
+prodct_id, product_category_id, product_name, product_description, product_price, product_image
 
 #Remove the erroneous data
 productsFilter = products.filter(lambda p: p.split(",")[4] != "")
