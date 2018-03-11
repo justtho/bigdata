@@ -1,0 +1,40 @@
+# Table Name: Order_Items
+
+# Get Revenue for count of items for each order id of order_item table - aggregateByKey
+# Columns in Order_items table: 
+Order_item_id, Order_item_order_id, Order_item_product_id,Order_item_quantity, Order_item_subtotal, Order_item_product_price
+2,             2,                   1073,                 1,                   199.99,              199.99
+3,             2,                   502,                  5,                   250.0,               50.0
+4,             2,                   403,                  1,                   129.99,              129.99
+orderItems = sc.textFile("/user/justycx201703/retail_db/order_items")
+for i in orderItems.take(10): print(i)
+
+orderItemsMap = orderItems.map(lambda oi: (int(oi.split(",")[1]), float(oi.split(",")[4])))
+for i in orderItemsMap.take(10): print(i)
+(1, 299.98)
+(2, 199.99)
+(2, 250.0)
+(2, 129.99)
+(4, 49.98)
+(4, 299.95)
+(4, 150.0)
+(4, 199.92)
+(5, 299.98)
+(5, 299.95)
+
+revenuePerOrder = orderItemsMap. \
+aggregateByKey((0.0, 0),
+  lambda x, y: (x[0] + y, x[1], 1),
+  lambda x, y: (x[0] + y[0], x[1] + y[1]))
+
+for i in revenuePerOrder.take(10): print(i)
+(2, (579.98, 0, 1))
+(4, (699.85, 0, 1))
+(8, (729.8399999999999, 0, 1))
+(10, (651.9200000000001, 0, 1))
+(12, (1299.8700000000001, 0, 1))
+(14, (549.94, 0, 1))
+(16, (419.93, 0, 1))
+(18, (449.96000000000004, 0, 1))
+(20, (879.8599999999999, 0, 1))
+(24, (829.97, 0, 1))
