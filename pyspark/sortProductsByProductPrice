@@ -1,0 +1,32 @@
+# Sort data by product price - sortByKey
+products = sc.textFile("/user/justycx201703/retail_db/products")
+for i in products.take(10): print(i)
+
+productsMap = products.map(lambda p: (float(p.split(",")[4]), p))
+productsSortedByPrice = productsMap.sortByKey()
+
+#There is a data quality issue so getting the following error:
+ValueError: could not convert string to float:
+
+#printing the erroroneous data
+for i in products.filter(lambda p: p.split(",")[4] == "").take(10): print(i) 
+
+685,31,"TaylorMade SLDR Irons - (Steel) 4-PW, AW",,899.99,http://images.acmesports.sports/TaylorMade+SLDR+Irons+-+%28Steel%29+4-PW%2C+AW
+
+# we can see AW",,899.99,:  has an additional ,,: filer and remove that row
+# Removing the erroneous data and print the rest of the data.
+
+productsMap = products.filter(lambda p: p.split(",")[4] != "").map(lambda p: (float(p.split(",")[4]), p))
+productsSortedByPrice = productsMap.sortByKey()
+for i in productsSortedMap.take(10): print(i)
+
+38,3,Nike Men's Hypervenom Phantom Premium FG Socc,,0.0,http://images.acmesports.sports/Nike+Men%27s+Hypervenom+Phantom+Premium+FG+Soccer+Cleat
+388,18,Nike Men's Hypervenom Phantom Premium FG Socc,,0.0,http://images.acmesports.sports/Nike+Men%27s+Hypervenom+Phantom+Premium+FG+Soccer+Cleat
+414,19,Nike Men's Hypervenom Phantom Premium FG Socc,,0.0,http://images.acmesports.sports/Nike+Men%27s+Hypervenom+Phantom+Premium+FG+Soccer+Cleat
+517,24,Nike Men's Hypervenom Phantom Premium FG Socc,,0.0,http://images.acmesports.sports/Nike+Men%27s+Hypervenom+Phantom+Premium+FG+Soccer+Cleat
+547,25,Nike Men's Hypervenom Phantom Premium FG Socc,,0.0,http://images.acmesports.sports/Nike+Men%27s+Hypervenom+Phantom+Premium+FG+Soccer+Cleat
+934,42,Callaway X Hot Driver,,0.0,http://images.acmesports.sports/Callaway+X+Hot+Driver
+1284,57,Nike Men's Hypervenom Phantom Premium FG Socc,,0.0,http://images.acmesports.sports/Nike+Men%27s+Hypervenom+Phantom+Premium+FG+Soccer+Cleat
+624,29,adidas Batting Helmet Hardware Kit,,4.99,http://images.acmesports.sports/adidas+Batting+Helmet+Hardware+Kit
+815,37,Zero Friction Practice Golf Balls - 12 Pack,,4.99,http://images.acmesports.sports/Zero+Friction+Practice+Golf+Balls+-+12+Pack
+336,15,"Nike Swoosh Headband - 2""",,5.0,http://images.acmesports.sports/Nike+Swoosh+Headband+-+2%22
