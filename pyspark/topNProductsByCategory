@@ -1,3 +1,15 @@
 # Top N products by product price in each category - By Key Ranking - groupByKey and flatMap
 products = sc.textFile("/user/justycx201703/retail_db/products")
 for i in products.take(10): print(i)
+
+Columns:
+prodct_id, product_category_id, product_name, product_description, product_price, product_image
+
+productsFiltered = products.filter(lambda p: p.split(",")[4] != "")
+for i in productsFiltered.take(10): print(i)
+
+productsMap = productsFiltered.map(lambda p: (int(p.split(",")[1]), p))
+for i in productsMap.take(10): print(i)
+
+productsGroupByCategoryId = productsMap.groupByKey()
+for i in productsGroupByCategoryId.take(100): print(i)
