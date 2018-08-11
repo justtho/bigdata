@@ -1,0 +1,116 @@
+create external table twitter.full_text (
+id string,
+ts string,
+lat_lon string,
+lat string,
+lon string,
+tweet string)
+row format delimited
+fields terminated by '\t'
+location '/user/twitter/full_text' ;
+
+create table twitter.full_text_ts as
+select id, cast(concat(substr(ts,1,10), ' ', substr(ts,12,8)) as timestamp) as ts, lat, lon, tweet
+from twitter.full_text;
+
+drop table twitter.full_text_ts_complex_tmp;
+
+create external table twitter.full_text_ts_complex_tmp (
+id string,
+ts timestamp,
+lat float,
+lon float,
+tweet string,
+location_array string,
+location_map string,
+tweet_struct string
+)
+row format delimited
+fields terminated by '\t'
+stored as textfile
+location '/user/twitter/full_text_ts_complex';
+
+insert overwrite table twitter.full_text_ts_complex_tmp
+select id, ts, lat, lon, tweet,
+concat(lat,',',lon) as location_array,
+concat('lat:', lat, ',', 'lon:', lon) as location_map,
+concat(regexp_extract(lower(tweet), '(.*)@user_(\\S{8})([:| ])(.*)',2), ',', length(tweet)) as tweet_struct
+from twitter.full_text_ts;
+
+select distinct lat, lon
+from twitter.full_text_ts_complex x
+where cast(x.lon as float) IN (select min(cast(y.lon as float)) as lon from twitter.full_text_ts y);
+
+select explode(histogram_numeric(lat, 10)) as hist_lat from twitter.full_text_ts_complex;
+select explode(histogram_numeric(lon, 10)) as hist_lon from twitter.full_text_ts_complex;
+
+select t1.lat, t2.lon
+from
+(select t.hist_lat.x as lat
+from (select explode(histogram_numeric(lat, 10)) as hist_lat
+from twitter.full_text_ts_complex
+where lat>=24.9493 AND lat<=49.5904 AND lon>=-125.0011 and lon<=-66.9326) t
+) t1
+JOIN
+(select t.hist_lon.x as lon
+from (select explode(histogram_numeric(lon, 10)) as hist_lon
+from twitter.full_text_ts_complex
+where lat>=24.9493 AND lat<=49.5904 AND lon>=-125.0011 and lon<=-66.9326) t
+) t2
+;
+
+create table twitter.full_text_ts_complex_1 as
+select id, ts, location_map, tweet, regexp_extract(lower(tweet_element), '(.*)@user_(
+\\S{8})([:| ])(.*)',2) as mention
+from twitter.full_text_ts_complex
+lateral view explode(split(tweet, '\\s')) tmp as tweet_element
+where trim(regexp_extract(lower(tweet_element), '(.*)@user_(\\S{8})([:| ])(.*)',2)) != "" ;
+
+tar -zxvf movielens.tgz
+create TABLE user_ratings ( userId INT, movieId INT, rating INT, time STRING ) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' STORED AS TEXTFILE;
+
+load data inpath '/user/lab/movie/u.data' overwrite into table user_ratings ;
+LOAD DATA INPATH '/home/hduser//movie/data' OVERWRITE INTO table u_data;
+
+hadoop fs -mkdir /user/lab/movie
+hadoop fs -put /home/lab/ml-data/u.data /user/lab/movie
+hadoop fs -put /home/lab/ml-data/u.item /user/lab/movie
+
+dfs -ls /user/lab/movie;
+
+load data inpath '/user/lab/movie/u.item' overwrite into table movies;
+
+select title from movies where cast(substr(release_date, 8, 11) as int) like '1990' ;
+
+ select  movieid from user_ratings where  ratings desc limit 10;
+
+select t1.movieid, t2.title
+from
+(select t.movieid, count(t.rating) as rcount from user_ratings a
+where rating=5  group by movieid, rating order by rcount desc limit 10) t
+) t1
+
+inner join
+
+(select a.movieid, b.title
+from user_ratings a, movies b
+where a.movieid=b.movieid) t
+) t2
+;
+
+
+select t1.movieid
+from
+(select movieid, count(rating) as rcount from user_ratings a
+where rating=5  group by movieid, rating order by rcount desc limit 10)
+) t1 ;
+select c.movieid, c.name, o.order_date, o.amount from customers c inner join orders o ON (c.id = o.customer_id);
+
+select * from
+(select a.movieid, b.title
+from user_ratings a, movies b
+where a.movieid=b.movieid) t
+where t.movieid in 
+(select movieid, count(rating) as rcount from user_ratings 
+where rating=5  group by movieid, rating order by rcount desc )
+limit 10);
