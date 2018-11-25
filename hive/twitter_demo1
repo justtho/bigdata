@@ -1,0 +1,63 @@
+create table twitter2018.twitter (
+id string,
+ts string,
+lat_lon string,
+lat string,
+lon string,
+tweet string)
+row format delimited
+fields terminated by '\t' ;
+
+load data inpath '/user/justycx201703/tweetsdescribe twitter2018.twitter;
+
+describe extended twitter2018.twitter;
+
+create table twitter2018.twitter_ts as
+select id, cast(concat(substr(ts,1,10), ' ', substr(ts,12,8)) as timestamp) as ts, lat, lon, tweet
+from twitter2018.twitter;
+
+select id, ts from twitter2018.twitter limit 5;
+create table twitter2018.twitter_2 as
+select *
+from twitter2018.twitter;
+
+select id, ts, trim(lower(tweet)) as tweet
+from twitter2018.twitter_ts
+limit 5;
+
+select id, ts, trim(upper(tweet)) as tweet
+from twitter2018.twitter_ts
+limit 5;
+
+select id, ts, length(tweet) as tweet
+from twitter2018.twitter_ts
+limit 5;
+
+select id, ts, sentences(tweet) as tokens
+from twitter2018.twitter_ts
+limit 5;
+
+select id, ts, regexp_extract(lower(tweet), '(.*)@user_(\\S{8})([:| ])(.*)',2) as patterns
+from twitter2018.twitter_ts
+limit 5;
+
+select t.id, t.len, t.tweet
+from (select id, tweet, length(tweet) as len from twitter2018.twitter_ts) t
+order by len desc
+limit 10;
+
+select t.id, t.len, t.trimmed_tweet
+from (select id, regexp_replace(tweet, "@USER_\\w{8}", "") as trimmed_tweet, 
+length(regexp_replace(tweet, "@USER_\\w{8}", " ")) as len from twitter2018.twitter_ts) t
+order by len desc
+limit 10;
+
+select * from
+(select id, ts, case when hour(ts) = 7 then 'breakfast'
+when hour(ts) = 12 then 'lunch'
+when hour(ts) = 19 then 'dinner'
+end as tw_eating,
+lat, lon
+from twitter2018.twitter_ts) t
+where t.tw_eating in ('breakfast','lunch','dinner')
+limit 10;
